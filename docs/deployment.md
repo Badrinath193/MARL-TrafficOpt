@@ -154,3 +154,28 @@ Then run:
 ```
 
 This script verifies the CLI and reminds you which three services to create.
+
+## Full CLI Deployment
+
+After authenticating Railway, this repo includes a full deployment script:
+
+```powershell
+railway login
+.\scripts\railway-full-deploy.ps1 -RailwayCli "railway" -ProjectName "MARL-TrafficOpt"
+```
+
+In a non-interactive environment, set a Railway token first:
+
+```powershell
+$env:RAILWAY_TOKEN="your_railway_token"
+.\scripts\railway-full-deploy.ps1 -RailwayCli "railway" -ProjectName "MARL-TrafficOpt"
+```
+
+The script:
+
+- creates a Railway project,
+- creates `rl-service`, `backend`, and `frontend` services,
+- sets service variables,
+- deploys each service from its folder,
+- generates public Railway domains,
+- wires backend to RL service and frontend to backend.
