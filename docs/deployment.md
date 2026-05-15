@@ -16,6 +16,16 @@ Native `sumo-gui` is desktop software. It works locally, but normal cloud hostin
 
 Create three Railway services from the same GitHub repo.
 
+Railway config files are already included:
+
+```text
+rl-service/railway.json
+backend/railway.json
+frontend/railway.json
+```
+
+These force Dockerfile builds and set health checks.
+
 ### 1. RL/SUMO Service
 
 Create a new Railway service:
@@ -23,6 +33,7 @@ Create a new Railway service:
 - Source: this GitHub repository.
 - Root directory: `rl-service`
 - Builder: Dockerfile
+- Config file path: `/rl-service/railway.json`
 
 Environment variables:
 
@@ -51,6 +62,7 @@ Create a second Railway service:
 - Source: this GitHub repository.
 - Root directory: `backend`
 - Builder: Dockerfile
+- Config file path: `/backend/railway.json`
 
 Environment variables:
 
@@ -72,6 +84,7 @@ Create a third Railway service:
 - Source: this GitHub repository.
 - Root directory: `frontend`
 - Builder: Dockerfile
+- Config file path: `/frontend/railway.json`
 
 Environment variables:
 
@@ -125,3 +138,19 @@ Excluded:
 - large downloaded OSM city networks
 
 Users can regenerate city networks from the app using the OSM search/import workflow.
+
+## CLI Check
+
+Railway deployment still requires logging in to the Railway account that owns the project:
+
+```powershell
+railway login
+```
+
+Then run:
+
+```powershell
+.\scripts\railway-deploy-check.ps1 -RailwayCli "railway"
+```
+
+This script verifies the CLI and reminds you which three services to create.
