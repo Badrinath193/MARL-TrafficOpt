@@ -1,0 +1,15 @@
+{
+  "name": "marl-trafficopt",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:js": "npm install --workspaces",
+    "build:frontend": "npm run build --workspace frontend",
+    "check:backend": "npm run check --workspace backend"
+  }
+}

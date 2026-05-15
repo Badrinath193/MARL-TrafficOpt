@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - RL_SERVICE_URL=http://rl-service:8000
+    depends_on:
+      - rl-service
+
+  rl-service:
+    build:
+      context: ./rl-service
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BACKEND_URL=http://localhost:3001
+    depends_on:
+      - backend

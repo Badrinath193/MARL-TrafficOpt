@@ -1,0 +1,61 @@
+{
+  "scenario_id": "osm/sample-mini-cross",
+  "display_name": "Sample Mini Cross",
+  "description": "Imported OSM scenario from sample-mini-cross.osm.xml.",
+  "network": "osm-netconvert",
+  "demand_profile": "external",
+  "status": "ready",
+  "limitations": [
+    "Ready for SUMO route generation, smoke runs, SUMO-GUI launch, and imported-network TraCI controllers.",
+    "Demand is generated synthetically with SUMO randomTrips unless calibrated demand is provided."
+  ],
+  "source": "osm-import",
+  "scenario_path": "C:\\Users\\tshiv\\Downloads\\MARL-TrafficOpt-fixed\\MARL-TrafficOpt-fixed\\scenarios\\osm\\sample-mini-cross",
+  "created_at": "2026-05-15T12:12:15.022622+00:00",
+  "osm_stats": {
+    "nodes": 5,
+    "ways": 2,
+    "highway_ways": 2,
+    "traffic_light_candidates": [],
+    "highway_intersection_candidates": [
+      "1"
+    ]
+  },
+  "netconvert": {
+    "attempted": true,
+    "ok": true,
+    "returncode": 0,
+    "net_path": "C:\\Users\\tshiv\\Downloads\\MARL-TrafficOpt-fixed\\MARL-TrafficOpt-fixed\\scenarios\\osm\\sample-mini-cross\\network.net.xml",
+    "stdout": "Success.\n",
+    "stderr": "",
+    "tools": {
+      "sumo": {
+        "name": "sumo",
+        "path": "C:\\Users\\tshiv\\AppData\\Roaming\\Python\\Python314\\site-packages\\sumo\\bin\\sumo.exe",
+        "available": true
+      },
+      "sumo_gui": {
+        "name": "sumo-gui",
+        "path": "C:\\Users\\tshiv\\AppData\\Roaming\\Python\\Python314\\site-packages\\sumo\\bin\\sumo-gui.exe",
+        "available": true
+      },
+      "netconvert": {
+        "name": "netconvert",
+        "path": "C:\\Users\\tshiv\\AppData\\Roaming\\Python\\Python314\\site-packages\\sumo\\bin\\netconvert.exe",
+        "available": true
+      },
+      "duarouter": {
+        "name": "duarouter",
+        "path": "C:\\Users\\tshiv\\AppData\\Roaming\\Python\\Python314\\site-packages\\sumo\\bin\\duarouter.exe",
+        "available": true
+      },
+      "ready": true,
+      "gui_ready": true,
+      "sumo_home": "C:\\Users\\tshiv\\AppData\\Roaming\\Python\\Python314\\site-packages\\sumo"
+    }
+  },
+  "files": {
+    "osm": "C:\\Users\\tshiv\\Downloads\\MARL-TrafficOpt-fixed\\MARL-TrafficOpt-fixed\\scenarios\\osm\\sample-mini-cross\\source.osm.xml",
+    "net": "C:\\Users\\tshiv\\Downloads\\MARL-TrafficOpt-fixed\\MARL-TrafficOpt-fixed\\scenarios\\osm\\sample-mini-cross\\network.net.xml"
+  }
+}
