@@ -164,6 +164,18 @@ railway login
 .\scripts\railway-full-deploy.ps1 -RailwayCli "railway" -ProjectName "MARL-TrafficOpt"
 ```
 
+On this Windows workspace, you can also run:
+
+```powershell
+.\deploy-railway.ps1
+```
+
+or double-click:
+
+```text
+deploy-railway.bat
+```
+
 In a non-interactive environment, set a Railway token first:
 
 ```powershell
