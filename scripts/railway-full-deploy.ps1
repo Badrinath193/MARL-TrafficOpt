@@ -18,6 +18,42 @@ function Invoke-RailwayJson {
   return $output | ConvertFrom-Json
 }
 
+function Get-ExistingProject {
+  param([string]$Name)
+  $projects = Invoke-RailwayJson @("list", "--json")
+  return $projects | Where-Object { $_.name -eq $Name } | Select-Object -First 1
+}
+
+function Ensure-ProjectLinked {
+  param([string]$Name)
+  try {
+    $project = Invoke-RailwayJson @("init", "--name", $Name, "--json")
+    Write-Host "Project ready."
+    return $project
+  } catch {
+    $project = Get-ExistingProject $Name
+    if (-not $project) {
+      throw
+    }
+    Write-Host "Project already exists; linking local workspace instead of creating another project."
+    & $RailwayCli link "--project" $project.id "--environment" $Environment | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      throw "Railway command failed: railway link --project $($project.id) --environment $Environment"
+    }
+    return $project
+  }
+}
+
+function Ensure-Service {
+  param($Project, [string]$Name)
+  $existing = @($Project.services.edges | ForEach-Object { $_.node.name }) -contains $Name
+  if ($existing) {
+    Write-Host "Service already exists: $Name"
+    return
+  }
+  Invoke-RailwayJson @("add", "--service", $Name, "--json") | Out-Null
+}
+
 function Get-PublicUrl {
   param($DomainResult)
   if ($DomainResult.url) { return $DomainResult.url }
@@ -27,6 +63,26 @@ function Get-PublicUrl {
   $text = $DomainResult | ConvertTo-Json -Compress
   if ($text -match "https://[^`"'\s,}]+") { return $Matches[0] }
   throw "Could not parse Railway public URL from: $text"
+}
+
+function Get-ExistingServiceUrl {
+  param([string]$Service)
+  $status = & $RailwayCli status
+  $line = $status | Where-Object { $_ -match "-\s+$([regex]::Escape($Service)):\s+.*https://[^\s]+" } | Select-Object -First 1
+  if ($line -match "https://[^\s]+") {
+    return $Matches[0]
+  }
+  return $null
+}
+
+function Ensure-PublicUrl {
+  param([string]$Service, [string]$Port)
+  $existingUrl = Get-ExistingServiceUrl $Service
+  if ($existingUrl) {
+    return $existingUrl
+  }
+  $domain = Invoke-RailwayJson @("domain", "--service", $Service, "--environment", $Environment, "--port", $Port, "--json")
+  return Get-PublicUrl $domain
 }
 
 Write-Host "Checking Railway CLI..."
@@ -39,13 +95,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Creating or linking Railway project: $ProjectName"
-$project = Invoke-RailwayJson @("init", "--name", $ProjectName, "--json")
-Write-Host "Project ready."
+$project = Ensure-ProjectLinked $ProjectName
 
-Write-Host "Creating services..."
-Invoke-RailwayJson @("add", "--service", "rl-service", "--json") | Out-Null
-Invoke-RailwayJson @("add", "--service", "backend", "--json") | Out-Null
-Invoke-RailwayJson @("add", "--service", "frontend", "--json") | Out-Null
+Write-Host "Creating or reusing services..."
+Ensure-Service $project "rl-service"
+Ensure-Service $project "backend"
+Ensure-Service $project "frontend"
 
 Write-Host "Configuring RL/SUMO service variables..."
 & $RailwayCli variable set "PORT=8000" "--service" "rl-service" "--environment" $Environment "--skip-deploys" "--json" | Out-Null
@@ -54,8 +109,7 @@ Write-Host "Configuring RL/SUMO service variables..."
 Write-Host "Deploying RL/SUMO service..."
 & $RailwayCli up ".\rl-service" "--path-as-root" "--service" "rl-service" "--environment" $Environment "--detach"
 if ($LASTEXITCODE -ne 0) { throw "RL/SUMO deploy failed." }
-$rlDomain = Invoke-RailwayJson @("domain", "--service", "rl-service", "--environment", $Environment, "--port", "8000", "--json")
-$rlUrl = Get-PublicUrl $rlDomain
+$rlUrl = Ensure-PublicUrl "rl-service" "8000"
 Write-Host "RL/SUMO URL: $rlUrl"
 
 Write-Host "Configuring backend variables..."
@@ -65,8 +119,7 @@ Write-Host "Configuring backend variables..."
 Write-Host "Deploying backend service..."
 & $RailwayCli up ".\backend" "--path-as-root" "--service" "backend" "--environment" $Environment "--detach"
 if ($LASTEXITCODE -ne 0) { throw "Backend deploy failed." }
-$backendDomain = Invoke-RailwayJson @("domain", "--service", "backend", "--environment", $Environment, "--port", "3001", "--json")
-$backendUrl = Get-PublicUrl $backendDomain
+$backendUrl = Ensure-PublicUrl "backend" "3001"
 Write-Host "Backend URL: $backendUrl"
 
 Write-Host "Configuring frontend variables..."
@@ -76,8 +129,7 @@ Write-Host "Configuring frontend variables..."
 Write-Host "Deploying frontend service..."
 & $RailwayCli up ".\frontend" "--path-as-root" "--service" "frontend" "--environment" $Environment "--detach"
 if ($LASTEXITCODE -ne 0) { throw "Frontend deploy failed." }
-$frontendDomain = Invoke-RailwayJson @("domain", "--service", "frontend", "--environment", $Environment, "--port", "5173", "--json")
-$frontendUrl = Get-PublicUrl $frontendDomain
+$frontendUrl = Ensure-PublicUrl "frontend" "5173"
 Write-Host "Frontend URL: $frontendUrl"
 
 Write-Host ""
