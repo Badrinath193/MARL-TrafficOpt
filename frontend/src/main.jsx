@@ -11,7 +11,8 @@ import './styles.css';
 
 gsap.registerPlugin(useGSAP);
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const runtimeConfig = window.__MARL_TRAFFICOPT_CONFIG__ || {};
+const backendUrl = runtimeConfig.BACKEND_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 function App() {
   const shellRef = useRef(null);
